@@ -1,0 +1,9 @@
+[submodule "third_party/glslang/src"]
+	path = third_party/glslang/src
+	url = https://github.com/coronalabs/external-metalangle-glslang.git
+[submodule "third_party/spirv-cross/src"]
+	path = third_party/spirv-cross/src
+	url = https://github.com/coronalabs/external-metalangle-SPIRV-Cross.git
+[submodule "third_party/jsoncpp"]
+	path = third_party/jsoncpp
+	url = https://github.com/coronalabs/external-metalangle-jsoncpp.git
