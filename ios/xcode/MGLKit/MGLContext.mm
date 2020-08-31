@@ -27,7 +27,14 @@ struct ThreadLocalInfo
     __weak MGLLayer *currentLayer     = nil;
 };
 
-#if TARGET_OS_SIMULATOR
+// There are some issuess with C++11 TLS could not be compiled on iOS
+// simulator, so we have to fallback to use pthread TLS.
+// Also, thread_local seem to require target SDK at least 9.0
+#if TARGET_OS_SIMULATOR || (__IPHONE_OS_VERSION_MIN_REQUIRED < 90000)
+	#define USE_PTHREAD_ONCE_INSTEAD_OF_THREADLOCAL 1
+#endif
+
+#if USE_PTHREAD_ONCE_INSTEAD_OF_THREADLOCAL
 pthread_key_t gThreadSpecificKey;
 void ThreadTLSDestructor(void *data)
 {
@@ -39,9 +46,7 @@ void ThreadTLSDestructor(void *data)
 
 ThreadLocalInfo &CurrentTLS()
 {
-#if TARGET_OS_SIMULATOR
-    // There are some issuess with C++11 TLS could not be compiled on iOS
-    // simulator, so we have to fallback to use pthread TLS.
+#if USE_PTHREAD_ONCE_INSTEAD_OF_THREADLOCAL
     static pthread_once_t sKeyOnce = PTHREAD_ONCE_INIT;
     pthread_once(&sKeyOnce, [] { pthread_key_create(&gThreadSpecificKey, ThreadTLSDestructor); });
 
