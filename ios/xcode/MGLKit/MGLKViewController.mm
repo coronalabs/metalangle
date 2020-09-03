@@ -18,6 +18,8 @@
 
 @implementation MGLKViewController
 
+@synthesize paused;
+
 #if TARGET_OS_OSX
 #    include "MGLKViewController+Mac.mm"
 #else
@@ -217,6 +219,11 @@
     {
         [_delegate mglkViewControllerUpdate:self];
     }
+}
+
+-(BOOL)isPaused
+{
+	return _displayLink != nil;
 }
 
 @end

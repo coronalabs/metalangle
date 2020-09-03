@@ -32,6 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly) NSTimeInterval timeSinceLastUpdate;
 
 @property(weak, nonatomic, readonly) MGLKView *glView;
+@property(nonatomic, readonly, getter=isPaused) BOOL paused;
 
 @end
 
