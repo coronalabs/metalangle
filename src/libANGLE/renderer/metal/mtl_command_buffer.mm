@@ -1076,11 +1076,20 @@ void RenderCommandEncoder::endEncodingImpl(bool considerDiscardSimulation)
     mStateCache.reset();
 }
 
-inline void RenderCommandEncoder::initWriteDependency(const TextureRef &texture)
+inline void RenderCommandEncoder::initAttachmentWriteDependencyAndScissorRect(
+    const RenderPassAttachmentDesc &attachment)
 {
+    TextureRef texture = attachment.texture();
     if (texture)
     {
         cmdBuffer().setWriteDependency(texture);
+
+        uint32_t mipLevel = attachment.level();
+
+        mRenderPassMaxScissorRect.width =
+            std::min<NSUInteger>(mRenderPassMaxScissorRect.width, texture->width(mipLevel));
+        mRenderPassMaxScissorRect.height =
+            std::min<NSUInteger>(mRenderPassMaxScissorRect.height, texture->height(mipLevel));
     }
 }
 
@@ -1153,6 +1162,11 @@ void RenderCommandEncoder::encodeMetalEncoder()
         // Verify that it was created successfully
         ASSERT(get());
 
+        if (mLabel)
+        {
+            metalCmdEncoder.label = mLabel;
+        }
+
         // Work-around driver bug on iOS devices: stencil must be explicitly set to zero
         // even if the doc says the default value is already zero.
         [metalCmdEncoder setStencilReferenceValue:0];
@@ -1188,19 +1202,26 @@ RenderCommandEncoder &RenderCommandEncoder::restart(const RenderPassDesc &desc)
         return *this;
     }
 
-    mRenderPassDesc = desc;
-    mRecording      = true;
-    mHasDrawCalls   = false;
+    mLabel.reset();
+
+    mRenderPassDesc            = desc;
+    mRecording                 = true;
+    mHasDrawCalls              = false;
+    mWarnOutOfBoundScissorRect = true;
+    mRenderPassMaxScissorRect  = {.x      = 0,
+                                 .y      = 0,
+                                 .width  = std::numeric_limits<NSUInteger>::max(),
+                                 .height = std::numeric_limits<NSUInteger>::max()};
 
     // mask writing dependency & set appropriate store options
     for (uint32_t i = 0; i < mRenderPassDesc.numColorAttachments; ++i)
     {
-        initWriteDependency(mRenderPassDesc.colorAttachments[i].texture());
+        initAttachmentWriteDependencyAndScissorRect(mRenderPassDesc.colorAttachments[i]);
     }
 
-    initWriteDependency(mRenderPassDesc.depthAttachment.texture());
+    initAttachmentWriteDependencyAndScissorRect(mRenderPassDesc.depthAttachment);
 
-    initWriteDependency(mRenderPassDesc.stencilAttachment.texture());
+    initAttachmentWriteDependencyAndScissorRect(mRenderPassDesc.stencilAttachment);
 
     // Convert to Objective-C descriptor
     mRenderPassDesc.convertToMetalDesc(mCachedRenderPassDescObjC);
@@ -1335,6 +1356,19 @@ RenderCommandEncoder &RenderCommandEncoder::setScissorRect(const MTLScissorRect 
     {
         return *this;
     }
+
+    if (rect.x + rect.width > mRenderPassMaxScissorRect.width ||
+        rect.y + rect.height > mRenderPassMaxScissorRect.height)
+    {
+        if (mWarnOutOfBoundScissorRect)
+        {
+            WARN() << "Out of bound scissor rect detected " << rect.x << " " << rect.y << " "
+                   << rect.width << " " << rect.height;
+        }
+        // Out of bound rect will crash the metal runtime, ignore it.
+        return *this;
+    }
+
     mStateCache.scissorRect = rect;
 
     mCommands.push(CmdType::SetScissorRect).push(rect);
@@ -1682,6 +1716,11 @@ void RenderCommandEncoder::popDebugGroup()
     mCommands.push(CmdType::PopDebugGroup);
 }
 
+void RenderCommandEncoder::setLabel(NSString *label)
+{
+    mLabel.retainAssign(label);
+}
+
 RenderCommandEncoder &RenderCommandEncoder::setColorStoreAction(MTLStoreAction action,
                                                                 uint32_t colorAttachmentIndex)
 {
@@ -1729,6 +1768,13 @@ RenderCommandEncoder &RenderCommandEncoder::setStencilStoreAction(MTLStoreAction
     // We only store the options, will defer the actual setting until the encoder finishes
     mRenderPassDesc.stencilAttachment.storeAction = action;
 
+    return *this;
+}
+
+RenderCommandEncoder &RenderCommandEncoder::setStoreAction(MTLStoreAction action)
+{
+    setColorStoreAction(action);
+    setDepthStencilStoreAction(action, action);
     return *this;
 }
 

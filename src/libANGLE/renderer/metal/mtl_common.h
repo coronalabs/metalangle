@@ -40,6 +40,16 @@
 #    endif
 #endif
 
+#if !defined(TARGET_OS_MACCATALYST)
+#    define TARGET_OS_MACCATALYST 0
+#endif
+
+#if defined(__ARM_ARCH)
+#    define ANGLE_MTL_ARM (__ARM_ARCH != 0)
+#else
+#    define ANGLE_MTL_ARM 0
+#endif
+
 #define ANGLE_MTL_OBJC_SCOPE @autoreleasepool
 
 #if !__has_feature(objc_arc)
@@ -115,6 +125,8 @@ constexpr uint32_t kMaxRenderTargets = 4;
 constexpr uint32_t kMaxShaderUBOs = 12;
 constexpr uint32_t kMaxUBOSize    = 16384;
 
+constexpr uint32_t kMaxShaderXFBs = gl::IMPLEMENTATION_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS;
+
 constexpr size_t kDefaultAttributeSize = 4 * sizeof(float);
 
 // Metal limits
@@ -129,9 +141,10 @@ constexpr uint32_t kVertexAttribBufferStrideAlignment = 4;
 #if TARGET_OS_OSX || TARGET_OS_MACCATALYST
 constexpr uint32_t kUniformBufferSettingOffsetMinAlignment = 256;
 #else
-constexpr uint32_t kUniformBufferSettingOffsetMinAlignment = 4;
+constexpr uint32_t kUniformBufferSettingOffsetMinAlignment = 16;
 #endif
 constexpr uint32_t kIndexBufferOffsetAlignment       = 4;
+constexpr uint32_t kArgumentBufferOffsetAlignment    = kUniformBufferSettingOffsetMinAlignment;
 constexpr uint32_t kTextureToBufferBlittingAlignment = 256;
 
 // Font end binding limits
@@ -159,7 +172,7 @@ constexpr uint32_t kStencilMaskAll = 0xff;  // Only 8 bits stencil is supported
 constexpr MTLVertexStepFunction kVertexStepFunctionInvalid =
     static_cast<MTLVertexStepFunction>(0xff);
 
-constexpr float kEmulatedAlphaValue = 1.0f;
+constexpr int kEmulatedAlphaValue = 1;
 
 constexpr uint32_t kOcclusionQueryResultSize = sizeof(uint64_t);
 
