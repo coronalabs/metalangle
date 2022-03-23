@@ -67,118 +67,14 @@ void Throw(NSString *msg)
 {
     [NSException raise:@"MGLSurfaceException" format:@"%@", msg];
 }
-
-EGLContext CreateEGLContext(EGLDisplay display, MGLRenderingAPI api, EGLContext sharedContext)
-{
-    // Init config
-    std::vector<EGLint> surfaceAttribs = {
-        EGL_RED_SIZE,       EGL_DONT_CARE, EGL_GREEN_SIZE,   EGL_DONT_CARE,
-        EGL_BLUE_SIZE,      EGL_DONT_CARE, EGL_ALPHA_SIZE,   EGL_DONT_CARE,
-        EGL_DEPTH_SIZE,     EGL_DONT_CARE, EGL_STENCIL_SIZE, EGL_DONT_CARE,
-        EGL_SAMPLE_BUFFERS, EGL_DONT_CARE, EGL_SAMPLES,      EGL_DONT_CARE,
-    };
-    surfaceAttribs.push_back(EGL_NONE);
-    EGLConfig config;
-    EGLint numConfigs;
-    if (!eglChooseConfig(display, surfaceAttribs.data(), &config, 1, &numConfigs) || numConfigs < 1)
-    {
-        Throw(@"Failed to call eglChooseConfig()");
-    }
-
-    // Init context
-    int ctxMajorVersion = 2;
-    int ctxMinorVersion = 0;
-    switch (api)
-    {
-        case kMGLRenderingAPIOpenGLES1:
-            ctxMajorVersion = 1;
-            ctxMinorVersion = 0;
-            break;
-        case kMGLRenderingAPIOpenGLES2:
-            ctxMajorVersion = 2;
-            ctxMinorVersion = 0;
-            break;
-        case kMGLRenderingAPIOpenGLES3:
-            ctxMajorVersion = 3;
-            ctxMinorVersion = 0;
-            break;
-        default:
-            UNREACHABLE();
-    }
-    EGLint ctxAttribs[] = {EGL_CONTEXT_MAJOR_VERSION, ctxMajorVersion, EGL_CONTEXT_MINOR_VERSION,
-                           ctxMinorVersion, EGL_NONE};
-
-    EGLContext eglContext = eglCreateContext(display, config, sharedContext, ctxAttribs);
-    if (eglContext == EGL_NO_CONTEXT)
-    {
-        Throw(@"Failed to call eglCreateContext()");
-    }
-
-    return eglContext;
-}
 }
 
 // MGLSharegroup implementation
-@interface MGLSharegroup () {
-    __weak MGLContext *_firstContext;
-    EGLDisplay _sharedEGLDisplay;
-    EGLContext _sharedEGLContext;
-}
-
-// This shared context is only created when the shared group has more
-// than one context.
-- (EGLContext)sharedEGLContext;
-- (void)addContext:(MGLContext *)context;
-
+@interface MGLSharegroup ()
+@property(atomic, weak) MGLContext *firstContext;
 @end
 
 @implementation MGLSharegroup
-
-- (id)init
-{
-    if (self = [super init])
-    {
-        _sharedEGLContext = EGL_NO_CONTEXT;
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    if (_sharedEGLContext != EGL_NO_CONTEXT)
-    {
-        eglDestroyContext(_sharedEGLDisplay, _sharedEGLContext);
-        _sharedEGLContext = EGL_NO_CONTEXT;
-    }
-}
-
-- (EGLContext)sharedEGLContext
-{
-    @synchronized(self)
-    {
-        return _sharedEGLContext;
-    }
-}
-
-- (void)addContext:(MGLContext *)context
-{
-    @synchronized(self)
-    {
-        if (!_firstContext)
-        {
-            _firstContext = context;
-        }
-        else if (_sharedEGLContext == EGL_NO_CONTEXT)
-        {
-            // If we have more than one context in the shared group, create
-            // a "master" context to be shared by all contexts in the group.
-            _sharedEGLDisplay = _firstContext.display.eglDisplay;
-            _sharedEGLContext =
-                CreateEGLContext(_sharedEGLDisplay, _firstContext.API, _firstContext.eglContext);
-        }
-    }
-}
-
 @end
 
 // MGLContext implementation
@@ -205,7 +101,10 @@ EGLContext CreateEGLContext(EGLDisplay display, MGLRenderingAPI api, EGLContext 
             _sharegroup = [MGLSharegroup new];
         }
 
-        [_sharegroup addContext:self];
+        if (!_sharegroup.firstContext)
+        {
+            _sharegroup.firstContext = self;
+        }
 
         [self initContext];
     }
@@ -236,6 +135,12 @@ EGLContext CreateEGLContext(EGLDisplay display, MGLRenderingAPI api, EGLContext 
         eglMakeCurrent(_display.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     }
 
+    if (_dummySurface != EGL_NO_SURFACE)
+    {
+        eglDestroySurface(_display.eglDisplay, _dummySurface);
+        _dummySurface = EGL_NO_SURFACE;
+    }
+
     if (_eglContext != EGL_NO_CONTEXT)
     {
         eglDestroyContext(_display.eglDisplay, _eglContext);
@@ -245,8 +150,66 @@ EGLContext CreateEGLContext(EGLDisplay display, MGLRenderingAPI api, EGLContext 
 
 - (void)initContext
 {
-    _eglContext =
-        CreateEGLContext(_display.eglDisplay, _renderingApi, _sharegroup.sharedEGLContext);
+    // Init config
+    std::vector<EGLint> surfaceAttribs = {
+        EGL_RED_SIZE,       EGL_DONT_CARE, EGL_GREEN_SIZE,   EGL_DONT_CARE,
+        EGL_BLUE_SIZE,      EGL_DONT_CARE, EGL_ALPHA_SIZE,   EGL_DONT_CARE,
+        EGL_DEPTH_SIZE,     EGL_DONT_CARE, EGL_STENCIL_SIZE, EGL_DONT_CARE,
+        EGL_SAMPLE_BUFFERS, EGL_DONT_CARE, EGL_SAMPLES,      EGL_DONT_CARE,
+    };
+    surfaceAttribs.push_back(EGL_NONE);
+    EGLConfig config;
+    EGLint numConfigs;
+    if (!eglChooseConfig(_display.eglDisplay, surfaceAttribs.data(), &config, 1, &numConfigs) ||
+        numConfigs < 1)
+    {
+        Throw(@"Failed to call eglChooseConfig()");
+    }
+
+    // Init context
+    int ctxMajorVersion = 2;
+    int ctxMinorVersion = 0;
+    switch (_renderingApi)
+    {
+        case kMGLRenderingAPIOpenGLES1:
+            ctxMajorVersion = 1;
+            ctxMinorVersion = 0;
+            break;
+        case kMGLRenderingAPIOpenGLES2:
+            ctxMajorVersion = 2;
+            ctxMinorVersion = 0;
+            break;
+        case kMGLRenderingAPIOpenGLES3:
+            ctxMajorVersion = 3;
+            ctxMinorVersion = 0;
+            break;
+        default:
+            UNREACHABLE();
+    }
+    EGLint ctxAttribs[] = {EGL_CONTEXT_MAJOR_VERSION, ctxMajorVersion, EGL_CONTEXT_MINOR_VERSION,
+                           ctxMinorVersion, EGL_NONE};
+
+    EGLContext sharedContext = EGL_NO_CONTEXT;
+    if (_sharegroup.firstContext != self)
+    {
+        sharedContext = _sharegroup.firstContext.eglContext;
+    }
+    _eglContext = eglCreateContext(_display.eglDisplay, config, sharedContext, ctxAttribs);
+    if (_eglContext == EGL_NO_CONTEXT)
+    {
+        Throw(@"Failed to call eglCreateContext()");
+    }
+
+    // Create dummy surface
+    _dummyLayer       = [[CALayer alloc] init];
+    _dummyLayer.frame = CGRectMake(0, 0, 1, 1);
+
+    _dummySurface = eglCreateWindowSurface(_display.eglDisplay, config,
+                                           (__bridge EGLNativeWindowType)_dummyLayer, nullptr);
+    if (_dummySurface == EGL_NO_SURFACE)
+    {
+        Throw(@"Failed to call eglCreateWindowSurface()");
+    }
 }
 
 - (BOOL)present:(MGLLayer *)layer
@@ -273,8 +236,8 @@ EGLContext CreateEGLContext(EGLDisplay display, MGLRenderingAPI api, EGLContext 
     }
 
     // No context
-    tlsData.currentContext = nil;
-    tlsData.currentLayer   = nil;
+    tlsData.currentContext   = nil;
+    tlsData.currentLayer     = nil;
 
     return eglMakeCurrent([MGLDisplay defaultDisplay].eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
                           EGL_NO_CONTEXT);
@@ -294,10 +257,10 @@ EGLContext CreateEGLContext(EGLDisplay display, MGLRenderingAPI api, EGLContext 
     if (!layer)
     {
         if (eglGetCurrentContext() != _eglContext ||
-            eglGetCurrentSurface(EGL_READ) != EGL_NO_SURFACE ||
-            eglGetCurrentSurface(EGL_DRAW) != EGL_NO_SURFACE)
+            eglGetCurrentSurface(EGL_READ) != _dummySurface ||
+            eglGetCurrentSurface(EGL_DRAW) != _dummySurface)
         {
-            if (!eglMakeCurrent(_display.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, _eglContext))
+            if (!eglMakeCurrent(_display.eglDisplay, _dummySurface, _dummySurface, _eglContext))
             {
                 return NO;
             }
