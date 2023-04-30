@@ -12572,13 +12572,13 @@
 					"${PROJECT_DIR}/../../samples/sample_util/",
 					"${PROJECT_DIR}/../..",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(S2D_MIN_VER_IOS:default=11.0)";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-Wno-shorten-64-to-32";
 				SDKROOT = iphoneos;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
+				TVOS_DEPLOYMENT_TARGET = "$(S2D_MIN_VER_TVOS:default=11.0)";
 				USER_HEADER_SEARCH_PATHS = Yes;
 				USE_HEADERMAP = NO;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -12662,12 +12662,12 @@
 					"${PROJECT_DIR}/../../samples/sample_util/",
 					"${PROJECT_DIR}/../..",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = "$(S2D_MIN_VER_IOS:default=11.0)";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				OTHER_CFLAGS = "-Wno-shorten-64-to-32";
 				SDKROOT = iphoneos;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
+				TVOS_DEPLOYMENT_TARGET = "$(S2D_MIN_VER_TVOS:default=11.0)";
 				USER_HEADER_SEARCH_PATHS = Yes;
 				USE_HEADERMAP = NO;
 				VALIDATE_PRODUCT = YES;
