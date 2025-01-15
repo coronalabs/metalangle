@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-  ios_10_15:
+  ios_12:
     runs-on: macos-10.15
     steps:
     - uses: actions/checkout@v2
@@ -39,8 +39,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  mac_10_15:
-    runs-on: macos-10.15
+  mac_14:
+    runs-on: macos-14
     steps:
     - uses: actions/checkout@v2
     - uses: ruby/setup-ruby@v1
@@ -99,8 +99,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  tvos_10_15:
-    runs-on: macos-10.15
+  tvos_12:
+    runs-on:  macos-14
     steps:
     - uses: actions/checkout@v2
     - uses: ruby/setup-ruby@v1
@@ -127,8 +127,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  ios_sim_10_15:
-    runs-on: macos-10.15
+  ios_sim_12:
+    runs-on: macos-14
     steps:
     - uses: actions/checkout@v2
     - uses: ruby/setup-ruby@v1
@@ -155,8 +155,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  tvos_sim_10_15:
-    runs-on: macos-10.15
+  tvos_sim_12:
+    runs-on: macos-14
     steps:
     - uses: actions/checkout@v2
     - uses: ruby/setup-ruby@v1
