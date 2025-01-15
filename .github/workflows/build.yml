@@ -76,6 +76,16 @@ jobs:
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools
           echo "${GITHUB_WORKSPACE}/depot_tools" >> $GITHUB_PATH
+
+      - name: Install pyenv and Python 2.7.18
+        run: |
+          brew install pyenv
+          pyenv install 2.7.18
+          pyenv global 2.7.18
+          echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
+          echo "$HOME/.pyenv/bin" >> $GITHUB_PATH
+          echo "$HOME/.pyenv/shims" >> $GITHUB_PATH
+          python --version
       - name: gclient sync
         run: |
           python -m pip install --upgrade setuptools
