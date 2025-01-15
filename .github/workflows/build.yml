@@ -72,11 +72,6 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v2
-      - name: Install Python 2 using Homebrew
-        run: |
-          brew install pyenv
-          pyenv install 2.7.18
-          pyenv global 2.7.18
       - name: prerequisite tools
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools
