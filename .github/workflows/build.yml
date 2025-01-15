@@ -78,6 +78,7 @@ jobs:
           echo "${GITHUB_WORKSPACE}/depot_tools" >> $GITHUB_PATH
       - name: gclient sync
         run: |
+          python -m pip install --upgrade setuptools
           python scripts/bootstrap.py
           gclient sync
       - name: gn gen
