@@ -67,14 +67,15 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
   build_gn:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 2
-        uses: actions/setup-python@v4
-        with:
-          python-version: 2.x
+      - name: Install Python 2 using Homebrew
+        run: |
+          brew install python@2
+          echo "$(brew --prefix python@2)/bin" >> $GITHUB_PATH
       - name: prerequisite tools
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools
