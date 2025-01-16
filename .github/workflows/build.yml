@@ -91,7 +91,17 @@ jobs:
           python scripts/bootstrap.py
           gclient sync
       - name: gn gen
-        run: gn gen out/release --args="angle_enable_gl=false is_debug=false strip_absolute_paths_from_debug_symbols=true"
+        run: |
+          brew install pyenv
+          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
+          echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.zshrc
+          echo 'eval "$(pyenv init --path)"' >> $HOME/.zshrc
+          source $HOME/.zshrc
+          pyenv install 2.7.18
+          pyenv global 2.7.18
+          pyenv rehash
+          python --version  # Confirm Python 2.7.18 is active
+          gn gen out/release --args="angle_enable_gl=false is_debug=false strip_absolute_paths_from_debug_symbols=true"
       - name: make
         run: ninja -C out/release angle_end2end_tests angle_deqp_gles2_tests hello_triangle
       - name: archive
