@@ -98,12 +98,16 @@ jobs:
         
       - name: gclient sync
         run: |
+          pyenv global 2.7.18
+          pyenv rehash
           python --version # Confirm Python 2.7.18 is active
           python scripts/bootstrap.py
           gclient sync
       
       - name: gn gen
         run: |
+          pyenv global 2.7.18
+          pyenv rehash
           python --version  # Confirm Python 2.7.18 is active
           gn gen out/release --args="angle_enable_gl=false is_debug=false strip_absolute_paths_from_debug_symbols=true"
       - name: make
