@@ -87,10 +87,9 @@ jobs:
           pyenv install 2.7.18
           pyenv global 2.7.18
           pyenv rehash
-          python --version  # Confirm Python 2.7.18 is active
       - name: gclient sync
         run: |
-          python -m pip install --upgrade setuptools
+          python --version  # Confirm Python 2.7.18 is active
           python scripts/bootstrap.py
           gclient sync
       - name: gn gen
