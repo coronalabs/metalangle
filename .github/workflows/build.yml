@@ -76,8 +76,8 @@ jobs:
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools
           echo "${GITHUB_WORKSPACE}/depot_tools" >> $GITHUB_PATH
-
-      - name: Install pyenv and Python 2.7.18
+          
+      - name: gclient sync
         run: |
           brew install pyenv
           echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
@@ -87,8 +87,6 @@ jobs:
           pyenv install 2.7.18
           pyenv global 2.7.18
           pyenv rehash
-      - name: gclient sync
-        run: |
           python --version  # Confirm Python 2.7.18 is active
           python scripts/bootstrap.py
           gclient sync
