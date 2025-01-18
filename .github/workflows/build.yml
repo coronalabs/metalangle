@@ -111,16 +111,25 @@ jobs:
           pyenv global 2.7.18
           pyenv rehash
       
-          # Confirm Python version
-          python --version
           python --version # Confirm Python 2.7.18 is active
           python scripts/bootstrap.py
           gclient sync
       
       - name: gn gen
         run: |
+          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
+          echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.zshrc
+          echo 'eval "$(pyenv init --path)"' >> $HOME/.zshrc
+          source $HOME/.zshrc
+      
+          # Install Python 2.7.18 only if not already installed
+          if ! pyenv versions | grep -q 2.7.18; then
+            pyenv install 2.7.18
+          fi
+      
           pyenv global 2.7.18
           pyenv rehash
+          
           python --version  # Confirm Python 2.7.18 is active
           gn gen out/release --args="angle_enable_gl=false is_debug=false strip_absolute_paths_from_debug_symbols=true"
       - name: make
