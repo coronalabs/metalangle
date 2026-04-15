@@ -14116,7 +14116,7 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
-					"../../third_party/glslang/src",
+					"$(SRCROOT)/../../third_party/glslang/src",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "";
@@ -14156,7 +14156,7 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
-					"../../third_party/glslang/src",
+					"$(SRCROOT)/../../third_party/glslang/src",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "";
@@ -14272,7 +14272,7 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
-					"../../third_party/glslang/src",
+					"$(SRCROOT)/../../third_party/glslang/src",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "";
@@ -14312,7 +14312,7 @@
 					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
-					"../../third_party/glslang/src",
+					"$(SRCROOT)/../../third_party/glslang/src",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "";
