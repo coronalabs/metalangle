@@ -5097,7 +5097,6 @@
 				0AC2A5232346714A0045B949 /* CoreFoundation.framework in Frameworks */,
 				0AAF41102354CE9B000E3CC8 /* UIKit.framework in Frameworks */,
 				0A9A6BA9239126DB006A152A /* CoreGraphics.framework in Frameworks */,
-				0A90FA2D2406840B005BA9A8 /* OpenGLES.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12711,7 +12710,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				OTHER_LDFLAGS = "";
+				MODULEMAP_FILE = module.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = com.google.OpenGLES;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -12749,7 +12748,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				OTHER_LDFLAGS = "";
+				MODULEMAP_FILE = module.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = com.google.OpenGLES;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
