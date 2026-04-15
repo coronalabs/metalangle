@@ -12430,6 +12430,10 @@
 					"${inherited}",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../third_party/glslang/src",
+					"$(inherited)",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = "${inherited}";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -12453,6 +12457,10 @@
 					"${inherited}",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../third_party/glslang/src",
+					"$(inherited)",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = "${inherited}";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -12472,6 +12480,10 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../third_party/glslang/src",
+					"$(inherited)",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = "${inherited}";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -12487,6 +12499,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../third_party/glslang/src",
+					"$(inherited)",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = "${inherited}";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
