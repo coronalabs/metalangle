@@ -1,0 +1,3 @@
+[submodule "third_party/glslang/src"]
+	path = third_party/glslang/src
+	url = https://github.com/coronalabs/external-metalangle-glslang.git
