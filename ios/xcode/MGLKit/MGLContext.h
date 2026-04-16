@@ -4,6 +4,8 @@
 // found in the LICENSE file.
 //
 
+#pragma once
+
 #import "MGLLayer.h"
 
 #include "EGL/egl.h"
