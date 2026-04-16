@@ -1,5 +1,11 @@
 framework module MetalANGLE {
   umbrella header "MGLKit.h"
+  // MGLContext.h includes EGL/egl.h which is not inside the framework bundle.
+  // Declaring it textual prevents the explicit module scanner from recursively
+  // scanning its includes and raising -Wnon-modular-include-in-framework-module.
+  // @import MetalANGLE still works — MGLContext types are available via the
+  // textual include chain from the umbrella header.
+  textual header "MGLContext.h"
   export *
   module * { export * }
 }
