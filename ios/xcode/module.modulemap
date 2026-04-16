@@ -5,7 +5,12 @@ framework module MetalANGLE {
   // scanning its includes and raising -Wnon-modular-include-in-framework-module.
   // @import MetalANGLE still works — MGLContext types are available via the
   // textual include chain from the umbrella header.
+  //
+  // module * { export * } is intentionally omitted: with textual header
+  // "MGLContext.h", each implicit submodule (MGLKView, etc.) would compile
+  // MGLContext.h in its own context, bypassing #import deduplication and
+  // causing "redefinition of MGLRenderingAPI". Without module *, the umbrella
+  // module has a single compilation context where #import deduplicates normally.
   textual header "MGLContext.h"
   export *
-  module * { export * }
 }
